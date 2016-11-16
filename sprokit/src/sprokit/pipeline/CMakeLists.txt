@@ -79,6 +79,7 @@ set(SPROKIT_DEFAULT_MODULE_PATHS "${sprokit_default_module_paths}"
 set(sprokit_library_options
   "DEFAULT_MODULE_PATHS=${path_prefix}\"${SPROKIT_DEFAULT_MODULE_PATHS}\"")
 
+###
 set(module_build_options
   "LIBRARY_SUFFIX=\"${CMAKE_SHARED_MODULE_SUFFIX}\"")
 
@@ -89,11 +90,9 @@ if (WIN32)
     SPROKIT_DEFAULT_MODULE_PATHS
     path_prefix)
 
-  list(APPEND pipeline_private_headers
-    module-paths.h.in)
+  list(APPEND pipeline_private_headers        module-paths.h.in)
 else ()
-  list(APPEND module_build_options
-    ${sprokit_library_options})
+  list(APPEND module_build_options        ${sprokit_library_options})
 endif ()
 
 set(default OFF)
@@ -107,36 +106,49 @@ option(SPROKIT_USE_CONFIGURATION_SUBDIRECTORY
   "Whether to look in the configuration's subdirectory for each module path (e.g. debug, release, ...)" ${default})
 
 if (SPROKIT_USE_CONFIGURATION_SUBDIRECTORY)
-  list(APPEND module_build_options
-    USE_CONFIGURATION_SUBDIRECTORY)
+  list(APPEND module_build_options       USE_CONFIGURATION_SUBDIRECTORY)
 endif ()
 
 set_source_files_properties(modules.cxx
   PROPERTIES
     COMPILE_DEFINITIONS "${module_build_options}")
 
+###
 set(utils_build_options)
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/thread_naming.cmake")
 
-list(APPEND utils_build_options
-  ${thread_naming_defines})
+list(APPEND utils_build_options       ${thread_naming_defines})
 
 set_source_files_properties(utils.cxx
   PROPERTIES
     COMPILE_DEFINITIONS "${utils_build_options}")
 
+###
 set(scheduler_build_options)
 
 # XXX(Boost): 1.50.0
 if (Boost_VERSION LESS 105000)
-  list(APPEND scheduler_build_options
-    BOOST_NO_HAVE_REVERSE_LOCK)
+  list(APPEND scheduler_build_options        BOOST_NO_HAVE_REVERSE_LOCK)
 endif ()
 
 set_source_files_properties(scheduler.cxx
   PROPERTIES
-    COMPILE_DEFINITIONS "${scheduler_build_options}")
+  COMPILE_DEFINITIONS "${scheduler_build_options}")
+
+###
+set(edge_build_options)
+
+set(SPROKIT_DEFAULT_EDGE_CAPACITY "10"
+  CACHE STRING "The default capacity for pipeline edges" )
+mark_as_advanced( SPROKIT_DEFAULT_EDGE_CAPACITY )
+
+list(APPEND edge_build_options        "SPROKIT_DEFAULT_EDGE_CAPACITY=${SPROKIT_DEFAULT_EDGE_CAPACITY}" )
+
+set_source_files_properties(edge.cxx
+  PROPERTIES
+  COMPILE_DEFINITIONS "${edge_build_options}")
+
 
 # XXX: The core library must be build shared because the plugins will otherwise
 # each have their own instance of the registries and then nothing else can get
